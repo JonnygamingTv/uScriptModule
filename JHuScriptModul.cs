@@ -14,7 +14,7 @@ namespace JHuScript
         protected override void OnModuleLoaded()
         {
             Logger.Log("JHuScriptModul loaded", ConsoleColor.White);
-            Logger.Log("VehicleMan.GetGuid(vehicleInstanceId); VehicleMan.Spawn(Guid, pos, angle); VehicleMan.SpawnLocked(Guid, pos, angle, playerOwnerId); VehicleMan.SpawnLockedByInstance(instanceId, pos, angle, playerOwnerId); VehicleMan.SetColor(instanceId, hexColor); VehicleMan.SetRandomColor(instanceId); VehicleMan.AddPlayer(instanceId, playerId); VehicleMan.AddPlayer(instanceId, seat);", ConsoleColor.White);
+            Logger.Log("VehicleMan.GetGuid(vehicleInstanceId); VehicleMan.Spawn(Guid, pos, angle); VehicleMan.SpawnLocked(Guid, pos, angle, playerOwnerId); VehicleMan.SpawnLockedByInstance(instanceId, pos, angle, playerOwnerId); VehicleMan.SetColor(instanceId, hexColor); VehicleMan.SetRandomColor(instanceId); VehicleMan.AddPlayer(instanceId, playerId); VehicleMan.AddPlayer(instanceId, playerId, seat);", ConsoleColor.White);
         }
     }
     [ScriptModule("VehicleMan")]
