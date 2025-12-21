@@ -12,3 +12,13 @@ VehicleMan.SetRandomColor(instanceId);
 VehicleMan.AddPlayer(instanceId, playerId);
 VehicleMan.AddPlayer(instanceId, playerId, seat);
 ```
+
+Example:
+```
+vehicle = player.look.getVehicle();
+spawnedVeh = VehicleMan.SpawnLockedByInstance(vehicle.instanceId, player.position, 1, player.id);
+if(spawnedVeh != null) {
+  VehicleMan.SetRandomColor(spawnedVeh.instanceId);
+  VehicleMan.AddPlayer(spawnedVeh.instanceId, player.id);
+}
+```
