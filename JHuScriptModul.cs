@@ -101,20 +101,20 @@ namespace JHuScript
             return true;
         }
         [ScriptFunction("AddPlayer")]
-        public static bool AddPlayer(uint instanceId, ulong playerId)
+        public static bool AddPlayer(uint instanceId, string playerId)
         {
             InteractableVehicle veh = VehicleManager.getVehicle(instanceId);
             if (veh == null) return false;
-            Rocket.Unturned.Player.UnturnedPlayer Pl = Rocket.Unturned.Player.UnturnedPlayer.FromCSteamID(new CSteamID(playerId));
+            Rocket.Unturned.Player.UnturnedPlayer Pl = Rocket.Unturned.Player.UnturnedPlayer.FromCSteamID(new CSteamID(ulong.Parse(playerId)));
             if (Pl == null) return false;
             return VehicleManager.ServerForcePassengerIntoVehicle(Pl.Player, veh);
         }
         [ScriptFunction("AddPlayer")]
-        public static bool AddPlayer(uint instanceId, ulong playerId, byte seat)
+        public static bool AddPlayer(uint instanceId, string playerId, byte seat)
         {
             InteractableVehicle veh = VehicleManager.getVehicle(instanceId);
             if (veh == null) return false;
-            Rocket.Unturned.Player.UnturnedPlayer Pl = Rocket.Unturned.Player.UnturnedPlayer.FromCSteamID(new CSteamID(playerId));
+            Rocket.Unturned.Player.UnturnedPlayer Pl = Rocket.Unturned.Player.UnturnedPlayer.FromCSteamID(new CSteamID(ulong.Parse(playerId)));
             if (Pl == null) return false;
             if (!VehicleManager.ServerForcePassengerIntoVehicle(Pl.Player, veh)) return false;
 
