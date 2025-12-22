@@ -14,7 +14,7 @@ namespace JHuScript
         protected override void OnModuleLoaded()
         {
             Logger.Log("JHuScriptModul loaded", ConsoleColor.White);
-            Logger.Log("VehicleMan.GetGuid(vehicleInstanceId); VehicleMan.Spawn(Guid, pos, angle); VehicleMan.SpawnLocked(Guid, pos, angle, playerOwnerId); VehicleMan.SpawnLockedByInstance(instanceId, pos, angle, playerOwnerId); VehicleMan.SetColor(vehicle, hexColor); VehicleMan.SetColor(instanceId, hexColor); VehicleMan.SetRandomColor(vehicle); VehicleMan.SetRandomColor(instanceId);");
+            Logger.Log("VehicleMan.GetGuid(vehicleInstanceId); VehicleMan.Spawn(Guid, pos, angle); VehicleMan.SpawnLocked(Guid, pos, angle, playerOwnerId); VehicleMan.SpawnLocked(vehicle, pos, angle, player); VehicleMan.SpawnLockedByInstance(instanceId, pos, angle, playerOwnerId); VehicleMan.SetColor(vehicle, hexColor); VehicleMan.SetColor(instanceId, hexColor); VehicleMan.SetRandomColor(vehicle); VehicleMan.SetRandomColor(instanceId);");
             Logger.Log("VehicleMan.AddPlayer(vehicle, player); VehicleMan.AddPlayer(instanceId, playerId); VehicleMan.AddPlayer(instanceId, playerId, seat);");
             Logger.Log("VehicleMan.Teleport(vehicle, Pos, Rot); VehicleMan.Teleport(instanceId, Pos, Rot); VehicleMan.Teleport(vehicle, player);");
         }
@@ -53,6 +53,35 @@ namespace JHuScript
             intVeh.tellLocked(new Steamworks.CSteamID(ulong.Parse(playerId)), Steamworks.CSteamID.Nil, true);
             return new VehicleClass(intVeh);
         }
+        [ScriptFunction("SpawnLocked")]
+        public static VehicleClass SpawnLocked(VehicleClass veh, Vector3Class position, float angle, PlayerClass player)
+        {
+            if (veh == null || veh.Vehicle == null || veh.Vehicle.asset == null)
+                return null;
+
+            InteractableVehicle intVeh = VehicleManager.spawnVehicleV2(
+                veh.Vehicle.asset,
+                position.Vector3,
+                UnityEngine.Quaternion.Euler(0f, angle, 0f)
+            );
+
+            if (intVeh == null)
+                return null;
+
+            if (ulong.TryParse(player.Id, out ulong steamId))
+            {
+                if (ulong.TryParse(player.SteamGroup, out ulong groupId))
+                {
+                    intVeh.tellLocked(new CSteamID(steamId), new CSteamID(groupId), true);
+                }
+                else
+                {
+                    intVeh.tellLocked(new CSteamID(steamId), CSteamID.Nil, true);
+                }
+            }
+
+            return new VehicleClass(intVeh);
+        }
         [ScriptFunction("SpawnLockedByInstance")]
         public static VehicleClass SpawnLockedByInstance(uint instanceId, Vector3Class position, float angle, string playerId)
         {
@@ -71,6 +100,36 @@ namespace JHuScript
 
             if (ulong.TryParse(playerId, out ulong steamId))
                 intVeh.tellLocked(new CSteamID(steamId), CSteamID.Nil, true);
+
+            return new VehicleClass(intVeh);
+        }
+        [ScriptFunction("SpawnLockedByInstance")]
+        public static VehicleClass SpawnLockedByInstance(uint instanceId, Vector3Class position, float angle, PlayerClass player)
+        {
+            var veh = VehicleManager.getVehicle(instanceId);
+            if (veh == null || veh.asset == null)
+                return null;
+
+            InteractableVehicle intVeh = VehicleManager.spawnVehicleV2(
+                veh.asset,
+                position.Vector3,
+                UnityEngine.Quaternion.Euler(0f, angle, 0f)
+            );
+
+            if (intVeh == null)
+                return null;
+
+            if (ulong.TryParse(player.Id, out ulong steamId))
+            {
+                if(ulong.TryParse(player.SteamGroup, out ulong groupId))
+                {
+                    intVeh.tellLocked(new CSteamID(steamId), new CSteamID(groupId), true);
+                }
+                else
+                {
+                    intVeh.tellLocked(new CSteamID(steamId), CSteamID.Nil, true);
+                }
+            }
 
             return new VehicleClass(intVeh);
         }
