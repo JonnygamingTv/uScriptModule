@@ -14,7 +14,7 @@ namespace JHuScript
         protected override void OnModuleLoaded()
         {
             Logger.Log("JHuScriptModul loaded", ConsoleColor.White);
-            Logger.Log("VehicleMan.GetGuid(vehicleInstanceId); VehicleMan.Spawn(Guid, pos, angle); VehicleMan.SpawnLocked(Guid, pos, angle, playerOwnerId); VehicleMan.SpawnLocked(vehicle, pos, angle, player); VehicleMan.SpawnLockedByInstance(instanceId, pos, angle, playerOwnerId); VehicleMan.SetColor(vehicle, hexColor); VehicleMan.SetColor(instanceId, hexColor); VehicleMan.SetRandomColor(vehicle); VehicleMan.SetRandomColor(instanceId); VehicleMan.CopyColor(copyFrom, copyTo);");
+            Logger.Log("VehicleMan.GetGuid(vehicleInstanceId); VehicleMan.Spawn(Guid, pos, angle); VehicleMan.SpawnLocked(Guid, pos, angle, playerOwnerId); VehicleMan.SpawnLocked(vehicle, pos, angle, player); VehicleMan.SpawnLocked(instanceId, pos, angle, player); VehicleMan.SpawnLockedByInstance(instanceId, pos, angle, playerOwnerId); VehicleMan.SetColor(vehicle, hexColor); VehicleMan.SetColor(instanceId, hexColor); VehicleMan.SetRandomColor(vehicle); VehicleMan.SetRandomColor(instanceId); VehicleMan.CopyColor(copyFrom, copyTo);");
             Logger.Log("VehicleMan.AddPlayer(vehicle, player); VehicleMan.AddPlayer(instanceId, playerId); VehicleMan.AddPlayer(instanceId, playerId, seat);");
             Logger.Log("VehicleMan.Teleport(vehicle, Pos, Rot); VehicleMan.Teleport(instanceId, Pos, Rot); VehicleMan.Teleport(vehicle, player);");
         }
@@ -81,6 +81,37 @@ namespace JHuScript
             }
             VehicleClass b = new VehicleClass(intVeh);
             CopyColor(veh, b);
+            return b;
+        }
+        [ScriptFunction("SpawnLocked")]
+        public static VehicleClass SpawnLocked(uint instanceId, Vector3Class position, float angle, PlayerClass player)
+        {
+            InteractableVehicle veh = VehicleManager.getVehicle(instanceId);
+            if (veh == null || veh.asset == null)
+                return null;
+
+            InteractableVehicle intVeh = VehicleManager.spawnVehicleV2(
+                veh.asset,
+                position.Vector3,
+                UnityEngine.Quaternion.Euler(0f, angle, 0f)
+            );
+
+            if (intVeh == null)
+                return null;
+
+            if (ulong.TryParse(player.Id, out ulong steamId))
+            {
+                if (ulong.TryParse(player.SteamGroup, out ulong groupId))
+                {
+                    intVeh.tellLocked(new CSteamID(steamId), new CSteamID(groupId), true);
+                }
+                else
+                {
+                    intVeh.tellLocked(new CSteamID(steamId), CSteamID.Nil, true);
+                }
+            }
+            VehicleClass b = new VehicleClass(intVeh);
+            CopyColor(new VehicleClass(veh), b);
             return b;
         }
         [ScriptFunction("SpawnLockedByInstance")]
