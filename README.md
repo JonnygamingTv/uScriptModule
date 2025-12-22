@@ -10,6 +10,7 @@ VehicleMan.SpawnLocked(vehicle, pos, angle, player);
 VehicleMan.SpawnLockedByInstance(instanceId, position, angle, playerOwnerId);
 VehicleMan.SetColor(vehicle, "hexColor");
 VehicleMan.SetColor(instanceId, "hexColor");
+VehicleMan.CopyColor(copyFromVehicle, copyToVehicle);
 VehicleMan.SetRandomColor(vehicle);
 VehicleMan.SetRandomColor(instanceId);
 VehicleMan.AddPlayer(vehicle, player);
