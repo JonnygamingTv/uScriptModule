@@ -14,7 +14,9 @@ namespace JHuScript
         protected override void OnModuleLoaded()
         {
             Logger.Log("JHuScriptModul loaded", ConsoleColor.White);
-            Logger.Log("VehicleMan.GetGuid(vehicleInstanceId); VehicleMan.Spawn(Guid, pos, angle); VehicleMan.SpawnLocked(Guid, pos, angle, playerOwnerId); VehicleMan.SpawnLockedByInstance(instanceId, pos, angle, playerOwnerId); VehicleMan.SetColor(instanceId, hexColor); VehicleMan.SetRandomColor(instanceId); VehicleMan.AddPlayer(instanceId, playerId); VehicleMan.AddPlayer(instanceId, playerId, seat);", ConsoleColor.White);
+            Logger.Log("VehicleMan.GetGuid(vehicleInstanceId); VehicleMan.Spawn(Guid, pos, angle); VehicleMan.SpawnLocked(Guid, pos, angle, playerOwnerId); VehicleMan.SpawnLockedByInstance(instanceId, pos, angle, playerOwnerId); VehicleMan.SetColor(vehicle, hexColor); VehicleMan.SetColor(instanceId, hexColor); VehicleMan.SetRandomColor(vehicle); VehicleMan.SetRandomColor(instanceId);");
+            Logger.Log("VehicleMan.AddPlayer(vehicle, player); VehicleMan.AddPlayer(instanceId, playerId); VehicleMan.AddPlayer(instanceId, playerId, seat);");
+            Logger.Log("VehicleMan.Teleport(vehicle, Pos, Rot); VehicleMan.Teleport(instanceId, Pos, Rot); VehicleMan.Teleport(vehicle, player);");
         }
     }
     [ScriptModule("VehicleMan")]
@@ -82,13 +84,26 @@ namespace JHuScript
             return veh.asset.GUID.ToString();
         }
         [ScriptFunction("SetColor")]
+        public static bool SetColor(VehicleClass veh, string color)
+        {
+            if (!veh.Vehicle.asset.SupportsPaintColor) return false;
+            veh.Vehicle.ServerSetPaintColor((UnityEngine.Color)Rocket.Unturned.Chat.UnturnedChat.GetColorFromHex(color));
+            return true;
+        }
+        [ScriptFunction("SetColor")]
         public static bool SetColor(uint instanceId, string color)
         {
             InteractableVehicle veh = VehicleManager.getVehicle(instanceId);
             if (veh == null) return false;
             if (!veh.asset.SupportsPaintColor) return false;
-            UnityEngine.Color _color = (UnityEngine.Color)Rocket.Unturned.Chat.UnturnedChat.GetColorFromHex(color);
-            veh.ServerSetPaintColor(_color);
+            veh.ServerSetPaintColor((UnityEngine.Color)Rocket.Unturned.Chat.UnturnedChat.GetColorFromHex(color));
+            return true;
+        }
+        [ScriptFunction("SetRandomColor")]
+        public static bool SetRandomColor(VehicleClass veh)
+        {
+            if (!veh.Vehicle.asset.SupportsPaintColor) return false;
+            veh.Vehicle.ServerSetPaintColor((UnityEngine.Color32)veh.Vehicle.asset.GetRandomDefaultPaintColor());
             return true;
         }
         [ScriptFunction("SetRandomColor")]
@@ -99,6 +114,11 @@ namespace JHuScript
             if (!veh.asset.SupportsPaintColor) return false;
             veh.ServerSetPaintColor((UnityEngine.Color32)veh.asset.GetRandomDefaultPaintColor());
             return true;
+        }
+        [ScriptFunction("AddPlayer")]
+        public static bool AddPlayer(VehicleClass veh, PlayerClass Pl)
+        {
+            return VehicleManager.ServerForcePassengerIntoVehicle(Pl.Player, veh.Vehicle);
         }
         [ScriptFunction("AddPlayer")]
         public static bool AddPlayer(uint instanceId, string playerId)
@@ -117,8 +137,35 @@ namespace JHuScript
             Rocket.Unturned.Player.UnturnedPlayer Pl = Rocket.Unturned.Player.UnturnedPlayer.FromCSteamID(new CSteamID(ulong.Parse(playerId)));
             if (Pl == null) return false;
             if (!VehicleManager.ServerForcePassengerIntoVehicle(Pl.Player, veh)) return false;
-
-            return veh.trySwapPlayer(Pl.Player, seat, out _);
+            if(veh.trySwapPlayer(Pl.Player, seat, out byte _seat) && _seat != seat)
+            {
+                VehicleManager.ReceiveSwapVehicleSeats(instanceId, _seat, seat);
+            }
+            return true;
+        }
+        [ScriptFunction("Teleport")]
+        public static bool Teleport(uint instanceId, Vector3Class Pos, Vector3Class Rot)
+        {
+            InteractableVehicle veh = VehicleManager.getVehicle(instanceId);
+            if (veh == null) return false;
+            UnityEngine.Quaternion rotat = new UnityEngine.Quaternion(Rot.X, Rot.Y, Rot.Z, Rot.Vector3.magnitude);
+            veh.transform.SetPositionAndRotation(Pos.Vector3, rotat);
+            return true;
+        }
+        [ScriptFunction("Teleport")]
+        public static void Teleport(VehicleClass Veh, Vector3Class Pos, Vector3Class Rot)
+        {
+            Veh.Vehicle.transform.SetPositionAndRotation(Pos.Vector3, new UnityEngine.Quaternion(Rot.X, Rot.Y, Rot.Z, Rot.Vector3.magnitude));
+        }
+        [ScriptFunction("Teleport")]
+        public static void Teleport(VehicleClass Veh, Vector3Class Pos, byte angle)
+        {
+            Veh.Vehicle.transform.SetPositionAndRotation(Pos.Vector3, UnityEngine.Quaternion.Euler(0, angle, 0));
+        }
+        [ScriptFunction("Teleport")]
+        public static void Teleport(VehicleClass Veh, PlayerClass Player)
+        {
+            Veh.Vehicle.transform.SetPositionAndRotation(Player.Position.Vector3, Player.Player.look.transform.rotation);
         }
 
         private static VehicleAsset ResolveVehicle(string text)
