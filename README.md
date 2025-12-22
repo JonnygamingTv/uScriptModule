@@ -17,6 +17,7 @@ VehicleMan.AddPlayer(instanceId, playerId);
 VehicleMan.AddPlayer(instanceId, playerId, seat); // currently broken
 VehicleMan.Teleport(vehicle, Position, vector3Rotation);
 VehicleMan.Teleport(instanceId, Position, vector3Rotation);
+VehicleMan.Teleport(vehicle, Position, angle);
 VehicleMan.Teleport(vehicle, player); // teleports vehicle to player position with player.look.rotation
 ```
 
