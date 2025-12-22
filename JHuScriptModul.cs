@@ -14,7 +14,7 @@ namespace JHuScript
         protected override void OnModuleLoaded()
         {
             Logger.Log("JHuScriptModul loaded", ConsoleColor.White);
-            Logger.Log("VehicleMan.GetGuid(vehicleInstanceId); VehicleMan.Spawn(Guid, pos, angle); VehicleMan.SpawnLocked(Guid, pos, angle, playerOwnerId); VehicleMan.SpawnLocked(vehicle, pos, angle, player); VehicleMan.SpawnLockedByInstance(instanceId, pos, angle, playerOwnerId); VehicleMan.SetColor(vehicle, hexColor); VehicleMan.SetColor(instanceId, hexColor); VehicleMan.SetRandomColor(vehicle); VehicleMan.SetRandomColor(instanceId);");
+            Logger.Log("VehicleMan.GetGuid(vehicleInstanceId); VehicleMan.Spawn(Guid, pos, angle); VehicleMan.SpawnLocked(Guid, pos, angle, playerOwnerId); VehicleMan.SpawnLocked(vehicle, pos, angle, player); VehicleMan.SpawnLockedByInstance(instanceId, pos, angle, playerOwnerId); VehicleMan.SetColor(vehicle, hexColor); VehicleMan.SetColor(instanceId, hexColor); VehicleMan.SetRandomColor(vehicle); VehicleMan.SetRandomColor(instanceId); VehicleMan.CopyColor(copyFrom, copyTo);");
             Logger.Log("VehicleMan.AddPlayer(vehicle, player); VehicleMan.AddPlayer(instanceId, playerId); VehicleMan.AddPlayer(instanceId, playerId, seat);");
             Logger.Log("VehicleMan.Teleport(vehicle, Pos, Rot); VehicleMan.Teleport(instanceId, Pos, Rot); VehicleMan.Teleport(vehicle, player);");
         }
@@ -79,8 +79,9 @@ namespace JHuScript
                     intVeh.tellLocked(new CSteamID(steamId), CSteamID.Nil, true);
                 }
             }
-
-            return new VehicleClass(intVeh);
+            VehicleClass b = new VehicleClass(intVeh);
+            CopyColor(veh, b);
+            return b;
         }
         [ScriptFunction("SpawnLockedByInstance")]
         public static VehicleClass SpawnLockedByInstance(uint instanceId, Vector3Class position, float angle, string playerId)
@@ -132,6 +133,12 @@ namespace JHuScript
             }
 
             return new VehicleClass(intVeh);
+        }
+        [ScriptFunction("CopyColor")]
+        public static void CopyColor(VehicleClass a, VehicleClass b)
+        {
+            if (!a.Vehicle.asset.SupportsPaintColor || !b.Vehicle.asset.SupportsPaintColor) return;
+            b.Vehicle.ServerSetPaintColor(a.Vehicle.PaintColor);
         }
 
         [ScriptFunction("GetGuid")]
