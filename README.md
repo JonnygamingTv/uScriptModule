@@ -20,6 +20,8 @@ VehicleMan.Teleport(vehicle, Position, vector3Rotation);
 VehicleMan.Teleport(instanceId, Position, vector3Rotation);
 VehicleMan.Teleport(vehicle, Position, angle);
 VehicleMan.Teleport(vehicle, player); // teleports vehicle to player position with player.look.rotation
+barricades = BarrMan.FindAllId(53135, player.id);
+BarrMan.CopyOwnerToClosest(barricade, r, 53135);
 ```
 
 Example:
