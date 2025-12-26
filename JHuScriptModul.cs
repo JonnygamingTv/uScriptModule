@@ -1,11 +1,14 @@
-﻿using Rocket.Core.Logging;
-using SDG.Unturned;
+﻿using SDG.Unturned;
 using Steamworks;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 using uScript.API.Attributes;
+using uScript.Core;
 using uScript.Module.Main.Classes;
 using uScript.Unturned;
+using Logger = Rocket.Core.Logging.Logger;
 
 namespace JHuScript
 {
@@ -301,6 +304,186 @@ namespace JHuScript
             }
 
             return null;
+        }
+    }
+    [ScriptModule("BarrMan")]
+    public class BarrMan
+    {
+        [ScriptFunction("CopyOwnerToClosest")]
+        public static void CopyOwnerToClosest(BarricadeClass barr, float radius = 5f, uint ignoreId = 0)
+        {
+            CopyOwnerToClosest(barr.BarricadeTransform, radius, ignoreId);
+            //List<Transform> res = new List<Transform>();
+            //BarricadeManager.getBarricadesInRadius(barr.BarricadeTransform.position, radius, res);
+            //BarricadeDrop drop = res.FirstOrDefault()?.parent as BarricadeDrop;
+        }
+        public static void CopyOwnerToClosest(Transform barr, float radius, uint ignoreId = 0)
+        {
+            List<BarricadeDrop> res = getBarricadesInRadius(barr, radius, ignoreId); // List<Transform> res = new List<Transform>();
+            if (res.Count == 0)
+            {
+                res = getAbsoluteBarricadesInRadius(barr, radius, ignoreId);
+            }
+            // BarricadeManager.getBarricadesInRadius(barr.position, radius, res);
+            // IEnumerable<Transform> g2 = res.OrderBy(tran => Vector3.Distance(tran.position, barr.position));
+            BarricadeDrop barrB = res.FirstOrDefault(gg=>gg.instanceID!=barr.GetInstanceID());
+            /*foreach(BarricadeDrop gg in res)
+            {
+                barrB = gg; // BarricadeManager.FindBarricadeByRootTransform(gg);
+                if (barrB.instanceID != barr.GetInstanceID()) break;
+            }*/
+            if (barrB == null) return;
+            BarricadeDrop barrA = BarricadeManager.FindBarricadeByRootTransform(barr);
+            BarricadeData g = barrB.GetServersideData();
+            BarricadeData b = barrA.GetServersideData();
+            barrA.ReceiveOwnerAndGroup(g.owner, g.group);
+            b.owner = g.owner; 
+            b.group = g.group;
+            BarricadeManager.changeOwnerAndGroup(barrA.model, g.owner, g.group);
+        }
+        [ScriptFunction("SetOwner")]
+        public static void SetOwner(BarricadeClass ba, string owner, string group = "")
+        {
+            BarricadeDrop barr = BarricadeManager.FindBarricadeByRootTransform(ba.BarricadeTransform);
+            barr.ReceiveOwnerAndGroup(ulong.Parse(owner), ulong.Parse(group));
+        }
+        [ScriptFunction("GetOwnerFromClosest")]
+        public static string GetOwnerFromClosest(BarricadeClass barr, float radius, uint ignoreId = 0)
+        {
+            return GetOwnerFromClosest(barr.BarricadeTransform, radius, ignoreId);
+        }
+        public static string GetOwnerFromClosest(Transform barr, float radius, uint ignoreId = 0)
+        {
+            List<BarricadeDrop> res = getBarricadesInRadius(barr, radius, ignoreId);
+            if (res.Count == 0)
+            {
+                res = getAbsoluteBarricadesInRadius(barr, radius, ignoreId);
+            }
+            List<Transform> res2 = new List<Transform>();
+            List<RegionCoordinate> search = new List<RegionCoordinate>();
+            // BarricadeManager.getBarricadesInRadius(barr.position, radius, res);
+            StructureManager.getStructuresInRadius(barr.position, radius, search, res2);
+#if DEBUG
+            Logger.Log("Found " + res.Count.ToString() + " barricade Transforms near that barricade.");
+            Logger.Log("Found " + res2.Count.ToString() + " structure Transforms near that barricade.");
+            if(res.Count == 0)
+            {
+                res = getAbsoluteBarricadesInRadius(barr, radius, ignoreId);
+                Logger.Log("Absolute find: " + res.Count.ToString());
+            }
+#endif
+            BarricadeDrop barrB = res.FirstOrDefault(gg=>gg.instanceID!=barr.GetInstanceID());
+#if DEBUG
+            //Logger.Log("Found "+g2.Count().ToString()+" barricade Transforms near that barricade. (Enumerable)");
+#endif
+            /*foreach (BarricadeDrop gg in res)
+            {
+                barrB = gg;
+#if DEBUG
+                Logger.Log("Checking: " + barrB.instanceID.ToString() + ", compare with: "+barr.GetInstanceID());
+#endif
+                if (barrB.instanceID != barr.GetInstanceID()) break;
+            }*/
+            if (barrB == null) return "";
+            BarricadeData g = barrB.GetServersideData();
+            return g.owner.ToString();
+        }
+        [ScriptFunction("CopyOwner")]
+        public static void CopyOwner(uint instanceId, uint toInstanceId)
+        {
+
+        }
+        [ScriptFunction("CopyOwnerFromClosestAll")]
+        public static void CopyOwnerFromClosestAll(ushort id, float radius = 5f)
+        {
+            List<BarricadeDrop> gg = FindAll(id);
+            foreach(BarricadeDrop g in gg)
+            {
+                CopyOwnerToClosest(g.model, radius, id);
+            }
+        }
+        [ScriptFunction("FindAllId")]
+        public static ExpressionValue FindAllId(ushort id)
+        {
+            List<BarricadeDrop> _list = FindAll(id);
+            IList<ExpressionValue> list2 = new List<ExpressionValue>();
+            foreach(var gg in _list)
+            {
+                var barr = ExpressionValue.CreateObject(new BarricadeClass(gg.model));
+                list2.Add(barr);
+            }
+            return ExpressionValue.Array(list2);
+        }
+        [ScriptFunction("FindAllId")]
+        public static ExpressionValue FindAllId(ushort id, string ownerId)
+        {
+            List<BarricadeDrop> _list = FindAll(id).Where(gg=>gg.GetServersideData().owner.ToString()==ownerId).ToList();
+            IList<ExpressionValue> list2 = new List<ExpressionValue>();
+            foreach (var gg in _list)
+            {
+                var barr = ExpressionValue.CreateObject(new BarricadeClass(gg.model));
+                list2.Add(barr);
+            }
+            return ExpressionValue.Array(list2);
+        }
+        [ScriptFunction("FindAllIdInRegion")]
+        public static ExpressionValue FindAllIdInRegion(BarricadeClass b, ushort id, string ownerId)
+        {
+            List<BarricadeDrop> _list = FindAllInRegion(b.BarricadeTransform,id).Where(gg => gg.GetServersideData().owner.ToString() == ownerId).ToList();
+            IList<ExpressionValue> list2 = new List<ExpressionValue>();
+            foreach (var gg in _list)
+            {
+                var barr = ExpressionValue.CreateObject(new BarricadeClass(gg.model));
+                list2.Add(barr);
+            }
+            return ExpressionValue.Array(list2);
+        }
+        public static List<BarricadeDrop> FindAll(ushort id)
+        {
+            var buildables = BarricadeManager.regions.Cast<BarricadeRegion>().Concat(BarricadeManager.vehicleRegions)
+                    .SelectMany(k => k.drops)
+                    .Where(k => k.asset.id == id).ToList();
+            return buildables;
+        }
+        public static List<BarricadeDrop> FindAllInRegion(Transform barr, ushort id)
+        {
+            List<BarricadeDrop> drops = new List<BarricadeDrop>();
+            if (BarricadeManager.tryGetRegion(barr, out byte x, out byte y, out ushort plant, out BarricadeRegion reg))
+            {
+                drops = reg.drops.Where(tran => tran.asset.id == id).ToList();
+            }
+            return drops;
+        }
+        public static List<BarricadeDrop> getBarricadesInRadius(Transform barr, float rad, uint ignoreId)
+        {
+            List<BarricadeDrop> drops = new List<BarricadeDrop>();
+            if (BarricadeManager.tryGetRegion(barr, out byte x, out byte y, out ushort plant, out BarricadeRegion reg))
+            {
+                drops = reg.drops.Where(tran => tran.asset.id != ignoreId && Vector3.Distance(tran.model.position, barr.position) < rad).OrderBy(tran => Vector3.Distance(tran.model.position, barr.position)).ToList();
+            }
+
+            return drops;
+        }
+        public static List<BarricadeDrop> getAbsoluteBarricadesInRadius(Transform barr, float rad, uint ignoreId)
+        {
+            List<BarricadeDrop> drops = BarricadeManager.regions.Cast<BarricadeRegion>().Concat(BarricadeManager.vehicleRegions)
+                    .SelectMany(k => k.drops)
+                    .Where(tran => tran.asset.id != ignoreId && Vector3.Distance(tran.model.position, barr.position) < rad)
+                    .OrderBy(tran => Vector3.Distance(tran.model.position, barr.position)).ToList();
+
+            return drops;
+        }
+        [ScriptFunction("GetTown")]
+        public static string GetClosestLocation(Vector3Class position)
+        {
+            return GetClosestLocation(position.Vector3).locationName;
+        }
+        public static LocationDevkitNode GetClosestLocation(Vector3 position)
+        {
+            return LevelNodes.nodes
+                .OfType<LocationDevkitNode>()
+                .OrderBy(l => (l.transform.position - position).sqrMagnitude)
+                .FirstOrDefault();
         }
     }
 }
