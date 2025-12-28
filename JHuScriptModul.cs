@@ -510,6 +510,12 @@ namespace JHuScript
             Rocket.API.Serialisation.RocketPermissionsGroup group = Rocket.Core.R.Permissions.GetGroup(id);
             return group._Members.Contains(playerId);
         }
+        [ScriptFunction("MemberIndex")]
+        public static int MemberIndex(string id, string playerId)
+        {
+            Rocket.API.Serialisation.RocketPermissionsGroup group = Rocket.Core.R.Permissions.GetGroup(id);
+            return group.Members.IndexOf(playerId);
+        }
         [ScriptFunction("AddMember")]
         public static bool AddMember(string id, string playerId)
         {
