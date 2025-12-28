@@ -22,6 +22,12 @@ VehicleMan.Teleport(vehicle, Position, angle);
 VehicleMan.Teleport(vehicle, player); // teleports vehicle to player position with player.look.rotation
 barricades = BarrMan.FindAllId(53135, player.id);
 BarrMan.CopyOwnerToClosest(barricade, r, 53135);
+PermissionMan.Exists(groupId);
+PermissionMan.Create(groupId, firstMemberId);
+PermissionMan.HasMember(groupId, playerId);
+PermissionMan.MemberIndex(groupId, playerId); // -1 = not a member, 0 = first member
+PermissionMan.AddMember(groupId, playerId);
+PermissionMan.RemoveMember(groupId, playerId);
 ```
 
 Example:
