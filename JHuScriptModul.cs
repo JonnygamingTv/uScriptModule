@@ -486,4 +486,43 @@ namespace JHuScript
                 .FirstOrDefault();
         }
     }
+    [ScriptModule("PermissionMan")]
+    public class PermissionMan
+    {
+        [ScriptFunction("Exists")]
+        public static bool Exists(string name)
+        {
+            return Rocket.Core.R.Permissions.GetGroup(name) != null;
+        }
+        [ScriptFunction("Create")]
+        public static bool Create(string id, string playerId = "")
+        {
+            if (Exists(id)) return false;
+            List<string> _members = new List<string>();
+            if (playerId != "") _members.Add(playerId);
+            Rocket.API.Serialisation.RocketPermissionsGroup newGroup = new Rocket.API.Serialisation.RocketPermissionsGroup(id, id, "", _members, new List<Rocket.API.Serialisation.Permission>());
+            Rocket.API.RocketPermissionsProviderResult res = Rocket.Core.R.Permissions.AddGroup(newGroup);
+            return res == Rocket.API.RocketPermissionsProviderResult.Success;
+        }
+        [ScriptFunction("HasMember")]
+        public static bool HasMember(string id, string playerId)
+        {
+            Rocket.API.Serialisation.RocketPermissionsGroup group = Rocket.Core.R.Permissions.GetGroup(id);
+            return group._Members.Contains(playerId);
+        }
+        [ScriptFunction("AddMember")]
+        public static bool AddMember(string id, string playerId)
+        {
+            Rocket.API.RocketPlayer gg = new Rocket.API.RocketPlayer(playerId);
+            Rocket.API.RocketPermissionsProviderResult res = Rocket.Core.R.Permissions.AddPlayerToGroup(id, gg);
+            return res == Rocket.API.RocketPermissionsProviderResult.Success;
+        }
+        [ScriptFunction("RemoveMember")]
+        public static bool RemoveMember(string id, string playerId)
+        {
+            Rocket.API.RocketPlayer gg = new Rocket.API.RocketPlayer(playerId);
+            Rocket.API.RocketPermissionsProviderResult res = Rocket.Core.R.Permissions.RemovePlayerFromGroup(id, gg);
+            return res == Rocket.API.RocketPermissionsProviderResult.Success;
+        }
+    }
 }

@@ -46,14 +46,17 @@
     <Reference Include="MySqlConnector">
       <HintPath>..\..\..\downloads\MySqlConnector.dll</HintPath>
     </Reference>
-    <Reference Include="Rocket.API">
-      <HintPath>F:\SteamLibrary\steamapps\common\Unturned\Extras\Rocket.Unturned\Rocket.API.dll</HintPath>
+    <Reference Include="Rocket.API, Version=4.9.3.16, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\downloads\RocketModFix-simple\RocketModFix-simple\Rocket\Rocket.API\bin\Release\net461\Rocket.API.dll</HintPath>
     </Reference>
-    <Reference Include="Rocket.Core">
-      <HintPath>F:\SteamLibrary\steamapps\common\Unturned\Extras\Rocket.Unturned\Rocket.Core.dll</HintPath>
+    <Reference Include="Rocket.Core, Version=4.9.3.16, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\downloads\RocketModFix-simple\RocketModFix-simple\Rocket\Rocket.Core\bin\Release\net461\Rocket.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Rocket.Unturned">
-      <HintPath>F:\SteamLibrary\steamapps\common\Unturned\Extras\Rocket.Unturned\Rocket.Unturned.dll</HintPath>
+    <Reference Include="Rocket.Unturned, Version=4.9.3.18, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\downloads\RocketModFix-simple\RocketModFix-simple\Rocket.Unturned\bin\Release\net461\Rocket.Unturned.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
